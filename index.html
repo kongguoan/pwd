@@ -1,280 +1,82 @@
-<html>
-<head>
-    <title>对数据加密解密</title>
-    <META HTTP-EQUIV="pragma" CONTENT="no-cache">
-	  <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
-	  <META HTTP-EQUIV="expires" CONTENT="0">
-	   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
-   <style>
-  .midtext{WIDTH: 80px; HEIGHT: 20px; BORDER: #666666 1px solid;}
-  .text{WIDTH: 120px; HEIGHT: 20px; BORDER: #666666 1px solid;}
-  .select{WIDTH: 240px; HEIGHT: 20px; BORDER: #666666 1px solid;}
-  .longselect{WIDTH: 320px; HEIGHT: 20px; BORDER: #666666 1px solid;}
-  .largetext{WIDTH: 480px; HEIGHT: 20px; BORDER: #666666 1px solid;}
-  .button{WIDTH: 64px;HEIGHT:22px;}
-  .littlebutton{WIDTH: 30px;HEIGHT:20px;}
-  .largebutton{WIDTH: 80px;HEIGHT:22px;}
-  .Title{FONT-FAMILY: Arial; FONT-SIZE: 10pt;FONT-BOLD:false}
-  .SystemTitle{FONT-FAMILY: Arial; FONT-SIZE: 30pt;FONT-BOLD:true}
-  .list{WIDTH: 225px; BORDER: #666666 1px solid;}
-  a{ font-size:12px; line-height: 12px; font-weight:bold; text-decoration: none;font-family:Arial;}
-  a:hover{ font-size:12px; line-height: 12px; font-weight:bold;color:Orange; text-decoration: none;font-family:Arial;}
-  body,table,td{margin-top:0px;margin-left:0px;margin-right:0px;margin-bottom:0px;font-size:12px;font-family:Arial;}
-  </style>
-</head>
-  <script language="JavaScript" type="text/javascript" src="des.js"></script>
-  <script language="JavaScript">
-<!--
-var symmetricKey = "";
-var ForReading = 1;
-      
-function getUUID(){     
-    var chars = '0123456789abcdef'.split('');       
-    var uuid = [], rnd = Math.random, r;     
-    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';     
-    uuid[14] = '4'; // version 4       
-    for (var i = 0; i < 36; i++){        
-        if (!uuid[i]){           
-            r = 0 | rnd()*16;             
-            uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];        
-        }     
-    }       
-    return uuid.join('');  
-}  
-function unicode2chinese(strContent) {
-var strTest=unescape(strContent.replace(/\\u/g,'%u'));
-return strTest;
-}
-function chinese2unicode(strContent) {
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+<title>加密解密</title> 
+<script type="text/javascript" src="./javascripts/jquery-1.7.2.js"></script></style>
+	<script type="text/javascript" src="./javascripts/core-min.js"></script>
+	<script type="text/javascript" src="./javascripts/aes.js"></script>
+	<script type="text/javascript" src="./javascripts/tripledes.js"></script>
+	<script type="text/javascript" src="./javascripts/rabbit.js"></script>
+	<script type="text/javascript" src="./javascripts/rc4.js"></script>
+	<div>
+		<div class="title">原文:</div>
+    	<textarea name="message" id="msg_source" value="" rows=10 cols=66></textarea>
+    </div>
+	<div >
+		<div >
+    		<label>加密算法:</label>
+			<ul>
+                <li><label for="aes" class="radio"><input type="radio" name="encrypt_type" value="aes" checked="checked" id="aes">AES</label></li>
+            	<li><label for="des" class="radio"><input type="radio" name="encrypt_type" value="des" id="des">DES</label></li>
+            	<li><label for="rc4" class="radio"><input type="radio" name="encrypt_type" value="rc4" id="rc4">RC4</label></li>
+    			<li><label for="rabbit" class="radio"><input type="radio" name="encrypt_type" value="rabbit" id="rabbit">Rabbit</label></li>
+    			<li><label for="tripledes" class="radio"><input type="radio" name="encrypt_type" value="tripledes" id="tripledes">TripleDes</label></li>
+            </ul>
+        </div>
+		<div >
+    		<label class="input">密码:
+    		<input type="text" id="pwd">
+			</label>
+			
+            <button onclick="javascript:encrypt();">加密 </button>
+            <button  onclick="javascript:decrypt();">解密 </button>
+	
+        </div>
+	</div>
+	
+	<div class="rightBar">
+		<div class="title">密文:</div>
+		<textarea name="cipher" id="encrypt_result" rows=10 cols=66></textarea>
+	</div>
 
-var strTest=strContent.replace(/[^\u0000-\u00FF]/g,function($0){return escape($0).replace(/(%u)(\w{4})/gi,"&#x$2;")});
-strTest=strTest.replace(/;/g,'');
-strTest=strTest.replace(/&#x/g,'\\u');
-return strTest;
-}
-function getRandomStringFromUUID(intSize){
-    var strUUID = getUUID();
-    while(strUUID.length < intSize){
-        strUUID =  strUUID + "--" + getUUID();
-    }
-    
-    return strUUID.substring(0,intSize);
-}
+	<script type="text/javascript">
+	    function encrypt(){
+		    switch($('input[name="encrypt_type"]:checked').val()){
+		    	case "aes":
+			    	$("#encrypt_result").val(CryptoJS.AES.encrypt($("#msg_source").val(),$("#pwd").val()));
+			    	break;
+		    	case "des":
+		    		$("#encrypt_result").val(CryptoJS.DES.encrypt($("#msg_source").val(),$("#pwd").val()));
+			    	break;
+			    case "rabbit":
+			    	$("#encrypt_result").val(CryptoJS.Rabbit.encrypt($("#msg_source").val(),$("#pwd").val()));
+			    	break;
+			    case "rc4":
+			    	$("#encrypt_result").val(CryptoJS.RC4.encrypt($("#msg_source").val(),$("#pwd").val()));
+			    	break;
+			    case "tripledes":
+			    	$("#encrypt_result").val(CryptoJS.TripleDES.encrypt($("#msg_source").val(),$("#pwd").val()));
+			    	break;
+			}
+	    }
+		function decrypt(){
+		    switch($('input[name="encrypt_type"]:checked').val()){
+		    	case "aes":
+			    	$("#msg_source").val(CryptoJS.AES.decrypt($("#encrypt_result").val(),$("#pwd").val()).toString(CryptoJS.enc.Utf8));
+			    	break;
+		    	case "des":
+		    		$("#msg_source").val(CryptoJS.DES.decrypt($("#encrypt_result").val(),$("#pwd").val()).toString(CryptoJS.enc.Utf8));
+			    	break;
+			    case "rabbit":
+			    	$("#msg_source").val(CryptoJS.Rabbit.decrypt($("#encrypt_result").val(),$("#pwd").val()).toString(CryptoJS.enc.Utf8));
+			    	break;
+			    case "rc4":
+			    	$("#msg_source").val(CryptoJS.RC4.decrypt($("#encrypt_result").val(),$("#pwd").val()).toString(CryptoJS.enc.Utf8));
+			    	break;
+			    case "tripledes":
+			    	$("#msg_source").val(CryptoJS.TripleDES.decrypt($("#encrypt_result").val(),$("#pwd").val()).toString(CryptoJS.enc.Utf8));
+			    	break;
+			   }
+	    }
+	</script>
+</div>
 
-function getRandomString(intSize){      
-    var str = "";      
-    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/-_=";        
-    for( var i = 0; i < intSize; i++ ) {
-        str += charSet.charAt(Math.floor(Math.random() * charSet.length));  
-    }   
-              
-    return str;  
-}  
-
-function readFromFile(strFile){
-    var txtContent = "";
-    var fso = new ActiveXObject("Scripting.FileSystemObject");
-    var f = fso.OpenTextFile( strFile, ForReading, true );        
-    while( ! f.AtEndOfStream ){            
-        var strLineText = f.ReadLine();
-        if (txtContent == ""){
-            txtContent = strLineText;
-        }
-        else{
-            txtContent += "\n" + strLineText;
-        }
-    }    
-    f.Close();
-    
-    return txtContent;
-}
-
-function saveToFile(strFileName,strFileContent){
-    var fso = new ActiveXObject("Scripting.FileSystemObject");
-    tf = fso.CreateTextFile(strFileName, true, true); 
-    
-    var arrFileContent = strFileContent.split("\n");
-    
-    for(var i = 0;i < arrFileContent.length;i ++){
-        tf.WriteLine(arrFileContent[i]);
-    }
-
-    tf.Close();
-    
-    alert(strFileName + " saved!");
-}
-
-function do_generate(){
-    if (document.cpccrypto.algorithm.value == "DES"){
-        symetricKey = getRandomString(8);
-        document.cpccrypto.cipherkey.value = symetricKey; 
-    }
-    else if (document.cpccrypto.algorithm.value == "3DES"){
-        symetricKey = getRandomString(24);
-        document.cpccrypto.cipherkey.value = symetricKey;
-    }
-}
-
-function stringToHex(str){    
-	  var ch, st, re = [];    
-	  for (var i = 0; i < str.length; i++ ) {      
-		    ch = str.charCodeAt(i);  // get char       
-		    st = [];                 // set up "stack"      
-		    do {        
-			     st.push( ch );  // push byte to stack        
-			     ch = ch >> 8;          // shift value down by 1 byte      
-		    }        
-		    while ( ch );      // add stack contents to result      
-		    // done because chars have "wrong" endianness      
-		    re = re.concat( st.reverse() );    
-	 }    
-	  
-	 var result = "";
-	 for(var i = 0;i < re.length;i ++){
-       result += re[i].toString(16);
-   }
-	 return result;    
-}
-
-function do_load_key(){
-    var strKeyFile = showModalDialog("selectFile.htm",
-                "Select " + document.cpccrypto.algorithm.value + " Key",
-                "width:400px;height:400px;resizeable:yes;");
-                
-    symetricKey = readFromFile(strKeyFile);
-    document.cpccrypto.cipherkey.value = symetricKey; 
-}
-
-
-
-
-
-//add blan
-function suffix_8Blank(str){
-    for(var i = 0;i < 8;i ++){
-        str += " ";
-    } 
-    
-    return str;
-}
-
-function checkCipherKey(){
-    if (document.cpccrypto.algorithm.value == "DES"){
-        if (document.cpccrypto.cipherkey.value.length != 8){
-            alert("DES 密匙 必须是8个字符!");
-            document.cpccrypto.cipherkey.focus();
-            return false;
-        }
-    }
-    if (document.cpccrypto.algorithm.value == "3DES"){
-        if (document.cpccrypto.cipherkey.value.length != 24){
-            alert("Triple DES 密匙 必须是24个字符!");
-            document.cpccrypto.cipherkey.focus();
-            return false;
-        }
-    }
-    return true;
-}
-
-function do_encrypt(){  
-    if (checkCipherKey() == false){
-        return;
-    }
-    if (document.cpccrypto.algorithm.value == "DES"||
-        document.cpccrypto.algorithm.value == "3DES"){  
-        document.cpccrypto.ciphertext.value = stringToHexForDES(des(
-            document.cpccrypto.cipherkey.value, 
-            suffix_8Blank(chinese2unicode(document.cpccrypto.plaintext.value)), 1, 0));
-    }
-}
-
-
-
-//JavaScriptDES 3DES解密Java加密的結果，末尾會帶有多余字符，需剔除
-function fix_des_result(strResult){
-    var i;
-    for(i = strResult.length - 1;i >= 0;i --){
-        if ((strResult.charCodeAt(i) > 16) && (strResult.charCodeAt(i) != 32)){
-            break;
-        }
-    }
-    
-    return strResult.substring(0,i + 1);
-}
-
-function do_decrypt(){
-    if (checkCipherKey() == false){
-        return;
-    }
-    
-    if (document.cpccrypto.algorithm.value == "DES"||
-        document.cpccrypto.algorithm.value == "3DES"){
-        document.cpccrypto.decrypttext.value = unicode2chinese(fix_des_result(des(
-            document.cpccrypto.cipherkey.value, 
-            hexToStringForDES(document.cpccrypto.ciphertext.value), 0, 0)));
-    }
-}
-//-->
-</script>
-
-<body>
-
-<form name="cpccrypto" onSubmit='do_encrypt();return false;'>
-<table border="0" cellspacing="0" id="tabView" name="tabView">
-  <tr>
-        <td><h6>算法:</h6></td>
-        <td><h6><SELECT NAME="algorithm">
-                  <OPTION VALUE="DES">DES
-                  <OPTION VALUE="3DES" selected="selected">Triple DES
-             </SELECT>
-             <input type="button" value="随机一个密匙" onClick="do_generate();">
-        <h6></td>
-        <td></td>
-        <td align=left></td>
-        <td></td>
-   </tr>
-   <tr>
-      <td><h6></h6></td>
-      <td colspan=4><h6><label id='lblMessage'></label></h6><td>
-   </tr>
-   <tr><td><h6>密匙:</h6></td>
-      <td rowspan=2 colspan=3>
-        <textarea name='cipherkey' id='cipherKey' rows=3 cols=66></textarea>
-      </td>
-
-   </tr>
-   <tr><td></td>
-       <td></td>
-   </tr>
-  <tr>
-  <td><h6>文本:</h6></td>
-  <td rowspan=2 colspan=3><textarea name="plaintext" rows=4 cols=66"></textarea></td>  
-  <td></td>
-  </tr>
-  <tr>
-    <td></td>  
-  <td><input type="button" value="加密" onClick="do_encrypt();" 
-        ></td>
-  </tr> 
-  <tr>
-  <td><h6>密文:</h6></td>
-  <td rowspan=2 colspan=3><textarea name="ciphertext" rows=6 cols=66></textarea></td>
-  <td></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><input type="button" value="解密" onClick="do_decrypt();" 
-               ></td>
-  </tr>
-  <tr><td><h6>解密的文本:</h6></td>
-      <td rowspan=2 colspan=3><textarea name="decrypttext" rows=6 cols=66></textarea></td>
-  </tr>
-   <tr>
-    <td></td>
-    <td></td>
-  </tr>
-</table>
-</form>
-<hr>
-</body>
-</html>
